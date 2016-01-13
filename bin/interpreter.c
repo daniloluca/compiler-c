@@ -1,13 +1,3 @@
- /*
-The Cradle - O Berço
-
-O código abaixo foi escrito por Felipo Soranz e é uma adaptação
-do código original em Pascal escrito por Jack W. Crenshaw em sua
-série "Let's Build a Compiler".
-
-Este código é de livre distribuição e uso.
-*/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -29,7 +19,7 @@ char getName();
 int getNum();
 void emit(char *fmt, ...);
 
-void term();
+int term();
 int expression();
 void add();
 void subtract();
@@ -165,25 +155,28 @@ void emit(char *fmt, ...){
 }
 
 /* analisa e traduz uma expressão */
-void term(){
-        factor();
-        while (look == '*' || look == '/') {
+int term(){
+        int val;
         
-                emit("PUSH AX");
-                switch(look) {
+        val = getNum();
+        while (isMulOp(look)) {
+
+                switch (look) {
                   case '*':
-        
-                        multiply();
+                        match('*');
+
+                        val *= getNum();
                         break;
                   case '/':
-                        divide();
-        
+
+                        match('/');
+                        val /= getNum();
+
                         break;
-                  default:
-                        break;
-        
                 }
         }
+
+        return val;
 
 }
 
@@ -196,20 +189,20 @@ int expression(){
         
                 val = 0;
         else
-                val = getNum();
+                val = term();
         
         while (isAddOp(look)) {
                 switch (look) {
         
                   case '+':
                         match('+');
-                        val += getNum();
+                        val += term();
         
                         break;
                   case '-':
                         match('-');
         
-                        val -= getNum();
+                        val -= term();
                         break;
                 }
         
